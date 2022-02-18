@@ -4,6 +4,7 @@
 // Students:  Add code to this file, Actor.h, StudentWorld.h, and StudentWorld.cpp
 Actor::Actor(StudentWorld* ptr, int imageID, int startX, int startY, int dir, int depth, double size): GraphObject(imageID, startX, startY, dir, depth, size), StudentWorldPtr(ptr)
 {
+    hp = 1;
     xCoord = startX;
     yCoord = startY;
 }
@@ -18,11 +19,19 @@ bool Actor::canBeDamaged()
 }
 void Actor::die()
 {
-    alive = false;
+    hp = 0;
+}
+void Actor::setHp(int health)
+{
+    hp = health;
 }
 bool Actor::isAlive()
 {
-    return alive;
+    if(hp>0)
+    {
+        return true;
+    }
+    return false;
 }
 Actor* Actor::overlap(int x, int y)
 {
@@ -52,7 +61,7 @@ Actor::~Actor()
 
 Peach::Peach(StudentWorld* ptr, int startX, int startY) : Actor(ptr, IID_PEACH, startX, startY, 0, 0, 1.0)
 {
-    hp = 1;
+    setHp(1);
     power = 0;
 }
 void Peach::doSomething()
@@ -78,6 +87,7 @@ void Peach::doSomething()
     {
         if(ch == KEY_PRESS_LEFT)
         {
+           // if(something is blocking) FILL IN LATER
             setDirection(180);
             if(overlap(getX()-4, getY())!=nullptr)
             {
@@ -90,7 +100,7 @@ void Peach::doSomething()
         }
         else if(ch == KEY_PRESS_RIGHT)
         {
-
+            // if(something is blocking) FILL IN LATER
              setDirection(0);
             if(overlap(getX()+4, getY())!=nullptr)
             {
@@ -105,7 +115,7 @@ void Peach::doSomething()
 }
 
 
-void Peach::bonk(Actor* gotBonked)
+void Peach::bonk(Actor* getBonked)
 {
 
 }
@@ -119,6 +129,7 @@ Environment::Environment(StudentWorld* ptr, int imageID, int startX, int startY,
     
 }
 
+
 void Environment::doSomething()
 {
     return;
@@ -126,11 +137,6 @@ void Environment::doSomething()
 bool Environment::canBeDamaged()
 {
     return false;
-}
-
-void Environment::bonk()
-{
-    
 }
 
 Block::Block(StudentWorld* ptr, int startX, int startY, int goodie) : Environment(ptr, IID_BLOCK, startX, startY, 0, 2, 1.0)
@@ -156,4 +162,3 @@ Pipe::Pipe(StudentWorld* ptr, int startX, int startY) : Environment(ptr, IID_PIP
 {
     
 }
-
