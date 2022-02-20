@@ -16,14 +16,15 @@ public:
   virtual int init();
   virtual int move();
   virtual void cleanUp();
+  void changeLevel();
+  void winGame();
+  Actor* overlap(int x, int y);
+  Actor* overlapPeach(int x, int y);
+    
   ~StudentWorld()
     {
         cleanUp();
     }
-  std::vector<Actor*> getActors()
-  {
-        return actors;
-  }
 
 private:
     std::vector<Actor*> actors;
