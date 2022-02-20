@@ -15,7 +15,7 @@ class Actor : public GraphObject
     virtual bool canBeDamaged();
     void die();
     bool isAlive();
-    //virtual void bonk(Actor* getBonked);//when an actor gets hit
+    virtual void bonk();//when an actor gets hit
     StudentWorld* getWorld();
     virtual ~Actor();
   private:
@@ -31,7 +31,7 @@ class Peach : public Actor
     Peach(StudentWorld* ptr, int startX, int startY);
     virtual void doSomething();
     virtual bool blockMovement();
-    virtual void bonk(Actor* getBonked);
+    virtual void bonk();
     void addHp(int health);
     virtual ~Peach();
   private:
@@ -50,6 +50,7 @@ class Environment : public Actor
 public:
     Environment(StudentWorld* ptr, int imageID, int startX, int startY, int dir, int depth, double size);
     virtual void doSomething();
+    virtual void bonk();
     virtual bool canBeDamaged();
 };
 
@@ -70,6 +71,7 @@ class Pipe : public Environment
 {
   public:
     Pipe(StudentWorld* ptr, int startX, int startY);
+    virtual void bonk();
     
 };
 
@@ -96,5 +98,36 @@ class Mario : public winCondition
 public:
     Mario(StudentWorld* ptr, int startX, int startY);
     virtual void change();
+};
+
+class Goodie : public Actor
+{
+public:
+    Goodie(StudentWorld* ptr, int imageID, int startX, int startY, int dir, int depth, double size);
+    virtual void doSomething();
+    virtual bool blockMovement();
+    virtual bool canBeDamaged();
+    virtual void addScore() = 0;
+};
+
+class Flower : public Goodie
+{
+public:
+    Flower(StudentWorld* ptr, int startX, int startY);
+    virtual void addScore();
+};
+
+class Mushroom : public Goodie
+{
+public:
+    Mushroom(StudentWorld* ptr, int startX, int startY);
+    virtual void addScore();
+};
+
+class Star : public Goodie
+{
+public:
+    Star(StudentWorld* ptr, int startX, int startY);
+    virtual void addScore();
 };
 #endif // ACTOR_H_

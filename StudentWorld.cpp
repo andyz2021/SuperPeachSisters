@@ -11,51 +11,6 @@ GameWorld* createStudentWorld(string assetPath)
 }
 
 // Students:  Add code to this file, StudentWorld.h, Actor.h, and Actor.cpp
-Actor* StudentWorld::overlap(int x, int y)//detect overlap
-{
-    for(int i = 0;i<actors.size();i++)
-    {
-        if(actors[i]->getX() <= x && actors[i]->getX()+SPRITE_WIDTH-1 >= x && actors[i]->getY() <= y && actors[i]->getY()+SPRITE_HEIGHT-1 >= y)//if the bottom left overlaps any block/pipe
-        {
-            return actors[i];//return a pointer to the actor that overlaps
-        }
-        if(actors[i]->getX() <= x+SPRITE_WIDTH-1 && actors[i]->getX()+SPRITE_WIDTH-1 >= x+SPRITE_WIDTH-1 && actors[i]->getY() <= y+SPRITE_HEIGHT-1 && actors[i]->getY()+SPRITE_HEIGHT-1 >= y+SPRITE_HEIGHT-1 )//if top right overlaps
-        {
-            return actors[i];//return a pointer to the actor that overlaps
-        }
-        if(actors[i]->getX() <= x && actors[i]->getX()+SPRITE_WIDTH-1 >= x && actors[i]->getY() <= y+SPRITE_HEIGHT-1 && actors[i]->getY()+SPRITE_HEIGHT-1 >= y+SPRITE_HEIGHT-1 )//if top left overlaps
-        {
-            return actors[i];//return a pointer to the actor that overlaps
-        }
-        if(actors[i]->getX() <= x+SPRITE_WIDTH-1 && actors[i]->getX()+SPRITE_WIDTH-1 >= x+SPRITE_WIDTH-1 && actors[i]->getY() <= y && actors[i]->getY()+SPRITE_HEIGHT-1 >= y)//if bottom right overlaps
-        {
-            return actors[i];//return a pointer to the actor that overlaps
-        }
-    }
-    return nullptr;
-}
-
-Actor* StudentWorld::overlapPeach(int x, int y)
-{
-    
-    if(PeachPtr->getX() <= x && PeachPtr->getX()+SPRITE_WIDTH-1 >= x && PeachPtr->getY() <= y && PeachPtr->getY()+SPRITE_HEIGHT-1 >= y)//if the bottom left overlaps any block/pipe
-    {
-        return PeachPtr;
-    }
-    if(PeachPtr->getX() <= x+SPRITE_WIDTH-1 && PeachPtr->getX()+SPRITE_WIDTH-1 >= x+SPRITE_WIDTH-1 && PeachPtr->getY() <= y+SPRITE_HEIGHT-1 && PeachPtr->getY()+SPRITE_HEIGHT-1 >= y+SPRITE_HEIGHT-1 )//if top right overlaps
-    {
-        return PeachPtr;
-    }
-    if(PeachPtr->getX() <= x && PeachPtr->getX()+SPRITE_WIDTH-1 >= x && PeachPtr->getY() <= y+SPRITE_HEIGHT-1 && PeachPtr->getY()+SPRITE_HEIGHT-1 >= y+SPRITE_HEIGHT-1 )//if top left overlaps
-    {
-        return PeachPtr;
-    }
-    if(PeachPtr->getX() <= x+SPRITE_WIDTH-1 && PeachPtr->getX()+SPRITE_WIDTH-1 >= x+SPRITE_WIDTH-1 && PeachPtr->getY() <= y && PeachPtr->getY()+SPRITE_HEIGHT-1 >= y )//if bottom right overlaps
-    {
-        return PeachPtr;
-    }
-    return nullptr;
-}
 
 StudentWorld::StudentWorld(string assetPath)
 : GameWorld(assetPath)
@@ -64,6 +19,101 @@ StudentWorld::StudentWorld(string assetPath)
     gameComplete = false;
 }
 
+int StudentWorld::overlap(int x, int y, bool bonk)//detect overlap. Returns 2 if the overlap is with an object that blocks movement, returns 1 if it doesn't block movement, returns 0 otherwise
+{
+    for(int i = 0;i<actors.size();i++)
+    {
+        if(actors[i]->getX() <= x && actors[i]->getX()+SPRITE_WIDTH-1 >= x && actors[i]->getY() <= y && actors[i]->getY()+SPRITE_HEIGHT-1 >= y)//if the bottom left overlaps any block/pipe
+        {
+            if(bonk==true)
+            {
+                actors[i]->bonk();
+            }
+            if(actors[i]->blockMovement())
+            {
+                return 2;
+            }
+            return 1;
+        }
+        if(actors[i]->getX() <= x+SPRITE_WIDTH-1 && actors[i]->getX()+SPRITE_WIDTH-1 >= x+SPRITE_WIDTH-1 && actors[i]->getY() <= y+SPRITE_HEIGHT-1 && actors[i]->getY()+SPRITE_HEIGHT-1 >= y+SPRITE_HEIGHT-1 )//if top right overlaps
+        {
+            
+            if(bonk==true)
+            {
+                actors[i]->bonk();
+            }
+            if(actors[i]->blockMovement())
+            {
+                return 2;
+            }
+            return 1;
+        }
+        if(actors[i]->getX() <= x && actors[i]->getX()+SPRITE_WIDTH-1 >= x && actors[i]->getY() <= y+SPRITE_HEIGHT-1 && actors[i]->getY()+SPRITE_HEIGHT-1 >= y+SPRITE_HEIGHT-1 )//if top left overlaps
+        {
+            if(bonk==true)
+            {
+                actors[i]->bonk();
+            }
+            if(actors[i]->blockMovement())
+            {
+                return 2;
+            }
+            return 1;
+        }
+        if(actors[i]->getX() <= x+SPRITE_WIDTH-1 && actors[i]->getX()+SPRITE_WIDTH-1 >= x+SPRITE_WIDTH-1 && actors[i]->getY() <= y && actors[i]->getY()+SPRITE_HEIGHT-1 >= y)//if bottom right overlaps
+        {
+            if(bonk==true)
+            {
+                actors[i]->bonk();
+            }
+            if(actors[i]->blockMovement())
+            {
+                return 2;
+            }
+            return 1;
+        }
+    }
+    return false;
+}
+
+bool StudentWorld::overlapPeach(int x, int y)//returns true if the object overlaps with Peach, false otherwise 
+{
+    
+    if(PeachPtr->getX() <= x && PeachPtr->getX()+SPRITE_WIDTH-1 >= x && PeachPtr->getY() <= y && PeachPtr->getY()+SPRITE_HEIGHT-1 >= y)//if the bottom left overlaps any block/pipe
+    {
+        return true;
+    }
+    if(PeachPtr->getX() <= x+SPRITE_WIDTH-1 && PeachPtr->getX()+SPRITE_WIDTH-1 >= x+SPRITE_WIDTH-1 && PeachPtr->getY() <= y+SPRITE_HEIGHT-1 && PeachPtr->getY()+SPRITE_HEIGHT-1 >= y+SPRITE_HEIGHT-1 )//if top right overlaps
+    {
+        return true;
+    }
+    if(PeachPtr->getX() <= x && PeachPtr->getX()+SPRITE_WIDTH-1 >= x && PeachPtr->getY() <= y+SPRITE_HEIGHT-1 && PeachPtr->getY()+SPRITE_HEIGHT-1 >= y+SPRITE_HEIGHT-1 )//if top left overlaps
+    {
+        return true;
+    }
+    if(PeachPtr->getX() <= x+SPRITE_WIDTH-1 && PeachPtr->getX()+SPRITE_WIDTH-1 >= x+SPRITE_WIDTH-1 && PeachPtr->getY() <= y && PeachPtr->getY()+SPRITE_HEIGHT-1 >= y )//if bottom right overlaps
+    {
+        return true;
+    }
+    return false;
+}
+
+
+void StudentWorld::addStar(int x, int y)
+{
+    actors.push_back(new Star(this, x, y));
+    //Add new Star
+}
+void StudentWorld::addMushroom(int x, int y)
+{
+    actors.push_back(new Mushroom(this, x, y));
+    //Add new Mushroom
+}
+void StudentWorld::addFlower(int x, int y)
+{
+    actors.push_back(new Flower(this, x, y));
+    //Add new Flower
+}
 int StudentWorld::init()
 {
     Level lev(assetPath());
@@ -95,15 +145,15 @@ int StudentWorld::init()
             }
             if(ge==Level::star_goodie_block)
             {
-                actors.push_back(new Block(this, i*SPRITE_WIDTH, k*SPRITE_HEIGHT, IID_STAR));
+                actors.push_back(new Block(this, i*SPRITE_WIDTH, k*SPRITE_HEIGHT, 1));
             }
             if(ge==Level::mushroom_goodie_block)
             {
-                actors.push_back(new Block(this, i*SPRITE_WIDTH, k*SPRITE_HEIGHT, IID_MUSHROOM));
+                actors.push_back(new Block(this, i*SPRITE_WIDTH, k*SPRITE_HEIGHT, 2));
             }
             if(ge==Level::flower_goodie_block)
             {
-                actors.push_back(new Block(this, i*SPRITE_WIDTH, k*SPRITE_HEIGHT, IID_FLOWER));
+                actors.push_back(new Block(this, i*SPRITE_WIDTH, k*SPRITE_HEIGHT, 3));
             }
             if(ge==Level::peach)
             {
@@ -140,6 +190,21 @@ int StudentWorld::move()
             actors[i]->doSomething();
         }
     }
+    /*
+    vector<Actor*>::iterator it;
+    for(it = actors.begin();it!=actors.end();)
+    {
+        if(!(*it)->isAlive())
+        {
+            it = actors.erase(it);
+            delete *it;
+        }
+        else
+        {
+            it++;
+        }
+    }
+    */
     return GWSTATUS_CONTINUE_GAME;
 }
 
@@ -158,6 +223,9 @@ void StudentWorld::cleanUp()
 {
     delete PeachPtr;
     vector<Actor*>::iterator it;
-    for (it = actors.begin(); it != actors.end(); ) // notice: no it++
+    for (it = actors.begin(); it != actors.end(); )// notice: no it++
+    {
         it = actors.erase(it);
+    }
+        
 }

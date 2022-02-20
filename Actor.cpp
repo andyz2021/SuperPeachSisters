@@ -26,6 +26,11 @@ bool Actor::isAlive()//get alive status
     return alive;
 }
 
+void Actor::bonk()
+{
+    
+}
+
 StudentWorld* Actor::getWorld()
 {
     return StudentWorldPtr;
@@ -74,16 +79,15 @@ void Peach::doSomething()
         time_to_recharge_before_next_fire--;
     }
     
-    if(getWorld()->overlap(getX(),getY()))//if overlapping with something, bonk it
+    if(getWorld()->overlap(getX(),getY(), true))//if overlapping with something, bonk it
     {
-        bonk(getWorld()->overlap(getX(),getY()));
+
     }
     
     if(remaining_jump_distance>0)//if in a jump
     {
-        if(getWorld()->overlap(getX(), getY()+4)!=nullptr && getWorld()->overlap(getX(), getY()-1)->blockMovement())//if something is above peach
+        if(getWorld()->overlap(getX(), getY()+4, true)==2)//if something is above peach, bonk it
         {
-            bonk(getWorld()->overlap(getX(), getY()+4));//bonk it
             remaining_jump_distance = 0;//set distance to 0 so peach falls
         }
         else
@@ -93,7 +97,7 @@ void Peach::doSomething()
         }
     }
     
-    if(remaining_jump_distance == 0 && (getWorld()->overlap(getX(), getY()-4)==nullptr && getWorld()->overlap(getX(), getY()-1)->blockMovement()))//if nothing below peach
+    if(remaining_jump_distance == 0 && (getWorld()->overlap(getX(), getY()-4, false)==0))//if nothing below peach
     {
         moveTo(getX(), getY()-4);//fall
     }
@@ -105,9 +109,9 @@ void Peach::doSomething()
         {
 
             setDirection(180);
-            if(getWorld()->overlap(getX()-4, getY())!=nullptr && getWorld()->overlap(getX(), getY()-1)->blockMovement())//if something blocking peach
+            if(getWorld()->overlap(getX()-4, getY(), true)==2)//if something blocking peach
             {
-                bonk(getWorld()->overlap(getX()-4, getY()));//bonk it
+
             }
             else
             {
@@ -118,9 +122,9 @@ void Peach::doSomething()
         {
 
              setDirection(0);
-            if(getWorld()->overlap(getX()+4, getY())!=nullptr && getWorld()->overlap(getX(), getY()-1)->blockMovement())
+            if(getWorld()->overlap(getX()+4, getY(), true)==2)
             {
-                bonk(getWorld()->overlap(getX()+4, getY()));
+
             }
             else
             {
@@ -130,7 +134,7 @@ void Peach::doSomething()
         else if(ch == KEY_PRESS_UP)//if up
         {
 
-            if(getWorld()->overlap(getX(), getY()-1)!=nullptr && getWorld()->overlap(getX(), getY()-1)->blockMovement())//if peach has something under
+            if(getWorld()->overlap(getX(), getY()-1, false)==2)//if peach has something under
             {
                 if(power==IID_MUSHROOM)
                 {
@@ -155,9 +159,9 @@ void Peach::doSomething()
 }
 
 
-void Peach::bonk(Actor* getBonked)
+void Peach::bonk()
 {
-
+    
 }
 Peach::~Peach()
 {
@@ -179,6 +183,11 @@ bool Environment::canBeDamaged()
     return false;
 }
 
+void Environment::bonk()
+{
+    
+}
+
 Block::Block(StudentWorld* ptr, int startX, int startY, int goodie) : Environment(ptr, IID_BLOCK, startX, startY, 0, 2, 1.0)
 {
     bonked = false;
@@ -191,6 +200,28 @@ bool Block::wasBonked()
 }
 void Block::bonk()
 {
+    if(n_goodie!=0 && !wasBonked())
+    {
+        getWorld()->playSound(SOUND_POWERUP_APPEARS);
+        /*
+        if(n_goodie==1)
+        {
+            getWorld()->addStar(getX(), getY()+8);
+        }
+        else if (n_goodie==2)
+        {
+            getWorld()->addMushroom(getX(), getY()+8);
+        }
+        else if (n_goodie==3)
+        {
+            getWorld()->addFlower(getX(), getY()+8);
+        }
+        */
+    }
+    else
+    {
+        getWorld()->playSound(SOUND_PLAYER_BONK);
+    }
     bonked = true;
 }
 Block::~Block()
@@ -201,6 +232,11 @@ Block::~Block()
 Pipe::Pipe(StudentWorld* ptr, int startX, int startY) : Environment(ptr, IID_PIPE, startX, startY, 0, 2, 1.0)
 {
     
+}
+
+void Pipe::bonk()
+{
+    getWorld()->playSound(SOUND_PLAYER_BONK);
 }
 
 winCondition::winCondition(StudentWorld* ptr, int imageID, int startX, int startY, int dir, int depth, double size) : Actor(ptr, imageID, startX, startY, dir, depth, size)
@@ -252,5 +288,85 @@ void Mario::change()
     getWorld()->winGame();
 }
 
+Goodie::Goodie(StudentWorld* ptr, int imageID, int startX, int startY, int dir, int depth, double size) : Actor(ptr, imageID, startX, startY, 0, 1, 1.0)
+{
+    
+}
+
+void Goodie::doSomething()
+{
+    if(getWorld()->overlapPeach(getX(),getY()))
+    {
+        addScore();
+        //Give Peach object jump power DO LATER
+        //Set Peach's hp to 2
+        die();
+        getWorld()->playSound(SOUND_PLAYER_POWERUP);
+        return;
+    }
+    if(getWorld()->overlap(getX(), getY()-1, false)!=2)
+    {
+        moveTo(getX(), getY()-2);
+    }
+    if(getDirection()==0)
+    {
+        if(getWorld()->overlap(getX()+2, getY(), false)==2)
+        {
+            setDirection(180);
+            return;
+        }
+        moveTo(getX()+2, getY());
+    }
+    else if(getDirection()==180)
+    {
+        if(getWorld()->overlap(getX()-2, getY(), false)==2)
+        {
+            setDirection(0);
+            return;
+        }
+        moveTo(getX()-2, getY());
+    }
+}
 
 
+bool Goodie::blockMovement()
+{
+    return false;
+}
+
+bool Goodie::canBeDamaged()
+{
+    return false;
+}
+
+
+Flower::Flower(StudentWorld* ptr, int startX, int startY) : Goodie(ptr, IID_FLOWER, startX, startY, 0, 1, 1.0)
+{
+    
+}
+
+void Flower::addScore()
+{
+    getWorld()->increaseScore(50);
+}
+
+Mushroom::Mushroom(StudentWorld* ptr, int startX, int startY) : Goodie(ptr, IID_MUSHROOM, startX, startY, 0, 1, 1.0)
+{
+
+}
+
+
+void Mushroom::addScore()
+{
+    getWorld()->increaseScore(75);
+}
+
+Star::Star(StudentWorld* ptr, int startX, int startY) : Goodie(ptr, IID_STAR, startX, startY, 0, 1, 1.0)
+{
+    
+}
+
+void Star::addScore()
+{
+    getWorld()->increaseScore(100);
+}

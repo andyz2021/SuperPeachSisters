@@ -18,8 +18,12 @@ public:
   virtual void cleanUp();
   void changeLevel();
   void winGame();
-  Actor* overlap(int x, int y);
-  Actor* overlapPeach(int x, int y);
+  void addStar(int x, int y);
+  void addMushroom(int x, int y);
+  void addFlower(int x, int y);
+  int overlap(int x, int y, bool bonk);
+  bool overlapPeach(int x, int y);
+
     
   ~StudentWorld()
     {
