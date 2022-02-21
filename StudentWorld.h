@@ -18,11 +18,10 @@ public:
   virtual void cleanUp();
   void changeLevel();
   void winGame();
-  void addStar(int x, int y);
-  void addMushroom(int x, int y);
-  void addFlower(int x, int y);
+  void addGoodie(int goodieType, int x, int y);
+  void addProjectile(int type, int x, int y);
   int overlap(int x, int y, bool bonk);
-  bool overlapPeach(int x, int y);
+  bool overlapPeach(int x, int y, bool bonk);
 
     
   ~StudentWorld()

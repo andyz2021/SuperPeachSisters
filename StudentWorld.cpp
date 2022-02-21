@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream> // defines the overloads of the << operator
 #include <sstream>  // defines the type std::ostringstream
+#include <iomanip>  // defines the manipulator setw
 using namespace std;
 
 GameWorld* createStudentWorld(string assetPath)
@@ -19,7 +20,7 @@ StudentWorld::StudentWorld(string assetPath)
     gameComplete = false;
 }
 
-int StudentWorld::overlap(int x, int y, bool bonk)//detect overlap. Returns 2 if the overlap is with an object that blocks movement, returns 1 if it doesn't block movement, returns 0 otherwise
+int StudentWorld::overlap(int x, int y, bool bonk)//detect overlap. Returns 3 if overlaps with a object that can be damaged. Returns 2 if the overlap is with an object that blocks movement, returns 1 if it doesn't block movement, returns 0 otherwise
 {
     for(int i = 0;i<actors.size();i++)
     {
@@ -28,6 +29,10 @@ int StudentWorld::overlap(int x, int y, bool bonk)//detect overlap. Returns 2 if
             if(bonk==true)
             {
                 actors[i]->bonk();
+            }
+            if(actors[i]->canBeDamaged())
+            {
+                return 3;
             }
             if(actors[i]->blockMovement())
             {
@@ -42,6 +47,10 @@ int StudentWorld::overlap(int x, int y, bool bonk)//detect overlap. Returns 2 if
             {
                 actors[i]->bonk();
             }
+            if(actors[i]->canBeDamaged())
+            {
+                return 3;
+            }
             if(actors[i]->blockMovement())
             {
                 return 2;
@@ -53,6 +62,10 @@ int StudentWorld::overlap(int x, int y, bool bonk)//detect overlap. Returns 2 if
             if(bonk==true)
             {
                 actors[i]->bonk();
+            }
+            if(actors[i]->canBeDamaged())
+            {
+                return 3;
             }
             if(actors[i]->blockMovement())
             {
@@ -66,6 +79,10 @@ int StudentWorld::overlap(int x, int y, bool bonk)//detect overlap. Returns 2 if
             {
                 actors[i]->bonk();
             }
+            if(actors[i]->canBeDamaged())
+            {
+                return 3;
+            }
             if(actors[i]->blockMovement())
             {
                 return 2;
@@ -76,44 +93,78 @@ int StudentWorld::overlap(int x, int y, bool bonk)//detect overlap. Returns 2 if
     return false;
 }
 
-bool StudentWorld::overlapPeach(int x, int y)//returns true if the object overlaps with Peach, false otherwise 
+bool StudentWorld::overlapPeach(int x, int y, bool bonk)//returns true if the object overlaps with Peach, false otherwise
 {
     
     if(PeachPtr->getX() <= x && PeachPtr->getX()+SPRITE_WIDTH-1 >= x && PeachPtr->getY() <= y && PeachPtr->getY()+SPRITE_HEIGHT-1 >= y)//if the bottom left overlaps any block/pipe
     {
+        if(bonk==true)
+        {
+            PeachPtr->bonk();
+        }
         return true;
     }
     if(PeachPtr->getX() <= x+SPRITE_WIDTH-1 && PeachPtr->getX()+SPRITE_WIDTH-1 >= x+SPRITE_WIDTH-1 && PeachPtr->getY() <= y+SPRITE_HEIGHT-1 && PeachPtr->getY()+SPRITE_HEIGHT-1 >= y+SPRITE_HEIGHT-1 )//if top right overlaps
     {
+        if(bonk==true)
+        {
+            PeachPtr->bonk();
+        }
         return true;
     }
     if(PeachPtr->getX() <= x && PeachPtr->getX()+SPRITE_WIDTH-1 >= x && PeachPtr->getY() <= y+SPRITE_HEIGHT-1 && PeachPtr->getY()+SPRITE_HEIGHT-1 >= y+SPRITE_HEIGHT-1 )//if top left overlaps
     {
+        if(bonk==true)
+        {
+            PeachPtr->bonk();
+        }
         return true;
     }
     if(PeachPtr->getX() <= x+SPRITE_WIDTH-1 && PeachPtr->getX()+SPRITE_WIDTH-1 >= x+SPRITE_WIDTH-1 && PeachPtr->getY() <= y && PeachPtr->getY()+SPRITE_HEIGHT-1 >= y )//if bottom right overlaps
     {
+        if(bonk==true)
+        {
+            PeachPtr->bonk();
+        }
         return true;
     }
     return false;
 }
 
+void StudentWorld::addGoodie(int goodieType, int x, int y)
+{
+    if(goodieType==1)
+    {
+        actors.push_back(new Star(this, x, y));
+    }
+    else if(goodieType==2)
+    {
+        actors.push_back(new Mushroom(this, x, y));
+    }
+    else if(goodieType==3)
+    {
+        actors.push_back(new Flower(this, x, y));
+    }
+}
 
-void StudentWorld::addStar(int x, int y)
+void StudentWorld::addProjectile(int type, int x, int y)
 {
-    actors.push_back(new Star(this, x, y));
-    //Add new Star
+    if(type==1)
+    {
+        actors.push_back(new PeachFireball(this, IID_PEACH_FIRE, x, y, PeachPtr->getDirection()));
+    }
+    else if (type==2)
+    {
+        actors.push_back(new PiranhaFireball(this, x, y, 0));//FILL IN LATER
+        //GET DIRECTION OF THAT PIRANHA ACTOR 
+    }
+    else if (type==3)
+    {
+        actors.push_back(new Shell(this, IID_SHELL, x, y, 0));//FILL IN LATER
+        //GET DIR OF KOOPA
+    }
 }
-void StudentWorld::addMushroom(int x, int y)
-{
-    actors.push_back(new Mushroom(this, x, y));
-    //Add new Mushroom
-}
-void StudentWorld::addFlower(int x, int y)
-{
-    actors.push_back(new Flower(this, x, y));
-    //Add new Flower
-}
+
 int StudentWorld::init()
 {
     Level lev(assetPath());
@@ -121,8 +172,8 @@ int StudentWorld::init()
     oss.fill('0');
     int levelNum = getLevel();
     oss << "level" << setw(2) << levelNum << ".txt";
-    string level_file = "level01.txt";
-    //string level_file = oss.str();
+    //string level_file = "level01.txt";
+    string level_file = oss.str();
     Level::LoadResult result = lev.loadLevel(level_file);
     if (result == Level::load_fail_file_not_found)
     {
@@ -190,21 +241,21 @@ int StudentWorld::move()
             actors[i]->doSomething();
         }
     }
-    /*
+    
     vector<Actor*>::iterator it;
     for(it = actors.begin();it!=actors.end();)
     {
         if(!(*it)->isAlive())
         {
-            it = actors.erase(it);
             delete *it;
+            it = actors.erase(it);
         }
         else
         {
             it++;
         }
     }
-    */
+    
     return GWSTATUS_CONTINUE_GAME;
 }
 
@@ -225,6 +276,7 @@ void StudentWorld::cleanUp()
     vector<Actor*>::iterator it;
     for (it = actors.begin(); it != actors.end(); )// notice: no it++
     {
+        delete *it;
         it = actors.erase(it);
     }
         

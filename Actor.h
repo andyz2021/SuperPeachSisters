@@ -33,14 +33,19 @@ class Peach : public Actor
     virtual bool blockMovement();
     virtual void bonk();
     void addHp(int health);
+    void setPower(int power);
     virtual ~Peach();
+    
   private:
-    int power;
+    bool flower;
+    bool star;
+    bool mushroom;
     int starLength;
     int tempImmune;
     int time_to_recharge_before_next_fire;
     int remaining_jump_distance;
     int hp;
+    
 };
 
 
@@ -108,6 +113,7 @@ public:
     virtual bool blockMovement();
     virtual bool canBeDamaged();
     virtual void addScore() = 0;
+    virtual void givePower() = 0;
 };
 
 class Flower : public Goodie
@@ -115,6 +121,7 @@ class Flower : public Goodie
 public:
     Flower(StudentWorld* ptr, int startX, int startY);
     virtual void addScore();
+    virtual void givePower();
 };
 
 class Mushroom : public Goodie
@@ -122,6 +129,7 @@ class Mushroom : public Goodie
 public:
     Mushroom(StudentWorld* ptr, int startX, int startY);
     virtual void addScore();
+    virtual void givePower();
 };
 
 class Star : public Goodie
@@ -129,5 +137,46 @@ class Star : public Goodie
 public:
     Star(StudentWorld* ptr, int startX, int startY);
     virtual void addScore();
+    virtual void givePower();
+};
+
+class Fireball : public Actor
+{
+public:
+    Fireball(StudentWorld* ptr, int imageID, int startX, int startY, int dir, int depth, double size);
+    virtual void doSomething();
+    virtual bool blockMovement();
+    virtual bool canBeDamaged();
+    virtual bool overlap() = 0;
+};
+
+class PiranhaFireball : public Fireball
+{
+public:
+    PiranhaFireball(StudentWorld* ptr, int startX, int startY, int dir);
+    virtual bool overlap();
+};
+
+class PeachFireball : public Fireball
+{
+public:
+    PeachFireball(StudentWorld* ptr, int imageID, int startX, int startY, int dir);
+    virtual bool overlap();
+};
+
+class Shell : public PeachFireball
+{
+public:
+    Shell(StudentWorld* ptr, int imageID, int startX, int startY, int dir);
+};
+
+class Enemies : public Actor
+{
+public:
+    Enemies(StudentWorld* ptr, int imageID, int startX, int startY, int dir, int depth, double size);
+    virtual void doSomething();
+    virtual bool canBeDamaged();
+    virtual bool blockMovement();
+    
 };
 #endif // ACTOR_H_
