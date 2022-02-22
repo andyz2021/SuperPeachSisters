@@ -19,9 +19,14 @@ public:
   void changeLevel();
   void winGame();
   void addGoodie(int goodieType, int x, int y);
-  void addProjectile(int type, int x, int y);
-  int overlap(int x, int y, bool bonk);
+  void addProjectile(int type, int x, int y, int dir);
+  int overlap(int x, int y, bool bonk, bool onlyBlocks);
+  bool extendOverSpace(int x, int y);
+  int randomDir();
   bool overlapPeach(int x, int y, bool bonk);
+  std::string determineText(bool star, bool flower, bool mushroom);
+  int getPeachX();
+  int getPeachY();
 
     
   ~StudentWorld()
