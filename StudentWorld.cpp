@@ -20,13 +20,13 @@ StudentWorld::StudentWorld(string assetPath)
     gameComplete = false;
 }
 
-int StudentWorld::overlap(int x, int y, bool bonk, bool onlyBlocks)//detect overlap. Returns 3 if overlaps with a object that can be damaged. Returns 2 if the overlap is with an object that blocks movement, returns 1 if it doesn't block movement, returns 0 otherwise. If bonk is true, the object that is overlapped with will be bonked. If onlyBlocks is true, it only checks for actors that block movement
+int StudentWorld::overlap(int x, int y, bool bonk, bool onlyBlocks)//detect overlap. Returns 3 if overlaps with a object that can be damaged(For Peach fireballs). Returns 2 if the overlap is with an object that blocks movement, returns 1 if it doesn't block movement, returns 0 otherwise. If bonk is true, the object that is overlapped with will be bonked. If onlyBlocks is true, it only checks for actors that block movement
 {
     for(int i = 0;i<actors.size();i++)
     {
         if(onlyBlocks)//only checking for actors that block movement
         {
-            if(actors[i]->blockMovement())
+            if(actors[i]->blockMovement() && actors[i]->isAlive())
             {
                 if(actors[i]->getX() >= x && actors[i]->getX() <= x+SPRITE_WIDTH-1 && actors[i]->getY() >= y && actors[i]->getY() <= y+SPRITE_HEIGHT-1)//if the bottom left of the actor overlaps the object calling overlap
                 {
@@ -68,72 +68,92 @@ int StudentWorld::overlap(int x, int y, bool bonk, bool onlyBlocks)//detect over
         }
         else//checks for all actors
         {
-            if(actors[i]->getX() >= x && actors[i]->getX() <= x+SPRITE_WIDTH-1 && actors[i]->getY() >= y && actors[i]->getY() <= y+SPRITE_HEIGHT-1)//if the bottom left of the actor overlaps the object calling overlap
+            if(actors[i]->isAlive())
             {
-                if(bonk==true)
+                if(actors[i]->getX() >= x && actors[i]->getX() <= x+SPRITE_WIDTH-1 && actors[i]->getY() >= y && actors[i]->getY() <= y+SPRITE_HEIGHT-1)//if the bottom left of the actor overlaps the object calling overlap
                 {
-                    actors[i]->bonk();
+                    if(bonk==true)
+                    {
+                        actors[i]->bonk();
+                    }
+                    if(actors[i]->canBeDamaged() && !onlyBlocks)
+                    {
+                        if(bonk==false)
+                        {
+                            damageEnemy(actors[i]);
+                        }
+                        return 3;
+                    }
+                    if(actors[i]->blockMovement())
+                    {
+                        return 2;
+                    }
+                    return 1;
                 }
-                if(actors[i]->canBeDamaged() && !onlyBlocks)
-                {
-                    return 3;
-                }
-                if(actors[i]->blockMovement())
-                {
-                    return 2;
-                }
-                return 1;
-            }
-            
-            if(actors[i]->getX()+SPRITE_WIDTH-1 >= x && actors[i]->getX()+SPRITE_WIDTH-1 <= x+SPRITE_WIDTH-1 && actors[i]->getY()+SPRITE_HEIGHT-1 >= y && actors[i]->getY()+SPRITE_HEIGHT-1 <= y+SPRITE_HEIGHT-1)//if top right overlaps
-            {
                 
-                if(bonk==true)
+                if(actors[i]->getX()+SPRITE_WIDTH-1 >= x && actors[i]->getX()+SPRITE_WIDTH-1 <= x+SPRITE_WIDTH-1 && actors[i]->getY()+SPRITE_HEIGHT-1 >= y && actors[i]->getY()+SPRITE_HEIGHT-1 <= y+SPRITE_HEIGHT-1)//if top right overlaps
                 {
-                    actors[i]->bonk();
+                    
+                    if(bonk==true)
+                    {
+                        actors[i]->bonk();
+                    }
+                    if(actors[i]->canBeDamaged() && !onlyBlocks)
+                    {
+                        if(bonk==false)
+                        {
+                            damageEnemy(actors[i]);
+                        }
+                        return 3;
+                    }
+                    if(actors[i]->blockMovement())
+                    {
+                        return 2;
+                    }
+                    return 1;
                 }
-                if(actors[i]->canBeDamaged() && !onlyBlocks)
+                if(actors[i]->getX() >= x && actors[i]->getX() <= x+SPRITE_WIDTH-1 && actors[i]->getY()+SPRITE_HEIGHT-1 >= y && actors[i]->getY()+SPRITE_HEIGHT-1 <= y+SPRITE_HEIGHT-1)//if top left overlaps
                 {
-                    return 3;
+                    if(bonk==true)
+                    {
+                        actors[i]->bonk();
+                    }
+                    if(actors[i]->canBeDamaged() && !onlyBlocks)
+                    {
+                        if(bonk==false)
+                        {
+                            damageEnemy(actors[i]);
+                        }
+                        return 3;
+                    }
+                    if(actors[i]->blockMovement())
+                    {
+                        return 2;
+                    }
+                    return 1;
                 }
-                if(actors[i]->blockMovement())
+                if(actors[i]->getX()+SPRITE_WIDTH-1 >= x && actors[i]->getX()+SPRITE_WIDTH-1 <= x+SPRITE_WIDTH-1 && actors[i]->getY() >= y && actors[i]->getY() <= y+SPRITE_HEIGHT-1)//if bottom right overlaps
                 {
-                    return 2;
+                    if(bonk==true)
+                    {
+                        actors[i]->bonk();
+                    }
+                    if(actors[i]->canBeDamaged() && !onlyBlocks)
+                    {
+                        if(bonk==false)
+                        {
+                            damageEnemy(actors[i]);
+                        }
+                        return 3;
+                    }
+                    if(actors[i]->blockMovement())
+                    {
+                        return 2;
+                    }
+                    return 1;
                 }
-                return 1;
             }
-            if(actors[i]->getX() >= x && actors[i]->getX() <= x+SPRITE_WIDTH-1 && actors[i]->getY()+SPRITE_HEIGHT-1 >= y && actors[i]->getY()+SPRITE_HEIGHT-1 <= y+SPRITE_HEIGHT-1)//if top left overlaps
-            {
-                if(bonk==true)
-                {
-                    actors[i]->bonk();
-                }
-                if(actors[i]->canBeDamaged() && !onlyBlocks)
-                {
-                    return 3;
-                }
-                if(actors[i]->blockMovement())
-                {
-                    return 2;
-                }
-                return 1;
-            }
-            if(actors[i]->getX()+SPRITE_WIDTH-1 >= x && actors[i]->getX()+SPRITE_WIDTH-1 <= x+SPRITE_WIDTH-1 && actors[i]->getY() >= y && actors[i]->getY() <= y+SPRITE_HEIGHT-1)//if bottom right overlaps
-            {
-                if(bonk==true)
-                {
-                    actors[i]->bonk();
-                }
-                if(actors[i]->canBeDamaged() && !onlyBlocks)
-                {
-                    return 3;
-                }
-                if(actors[i]->blockMovement())
-                {
-                    return 2;
-                }
-                return 1;
-            }
+
              
         }
 
@@ -223,17 +243,15 @@ void StudentWorld::addProjectile(int type, int x, int y, int dir)//add projectil
 {
     if(type==1)
     {
-        actors.push_back(new PeachFireball(this, IID_PEACH_FIRE, x, y, dir));
+        actors.push_back(new PeachFireball(this, x, y, dir));
     }
     else if (type==2)
     {
-        actors.push_back(new PiranhaFireball(this, x, y, dir));//FILL IN LATER
-        //GET DIRECTION OF THAT PIRANHA ACTOR 
+        actors.push_back(new PiranhaFireball(this, x, y, dir));
     }
     else if (type==3)
     {
-        actors.push_back(new Shell(this, IID_SHELL, x, y, dir));//FILL IN LATER
-        //GET DIR OF KOOPA
+        actors.push_back(new Shell(this, x, y, dir));
     }
 }
 
@@ -270,6 +288,38 @@ string StudentWorld::determineText(bool star, bool flower, bool mushroom)//Deter
     return text;
 }
     
+bool StudentWorld::PeachHasStar()
+{
+    return PeachPtr->hasStar();
+}
+    
+void StudentWorld::givePeachPower(int type)//Gives peach a power.
+{
+    if(type==1)
+    {
+        PeachPtr->setPower(1);//gives peach star power.
+    }
+    if(type==2)
+    {
+        PeachPtr->setPower(2);//give peach mushroom power.
+    }
+    if(type==3)
+    {
+        PeachPtr->setPower(3);//give peach flower power 
+    }
+    
+}
+    
+void StudentWorld::damageEnemy(Actor* enemy)
+{
+    enemy->getDamaged();
+}
+    
+
+void StudentWorld::setPeachInvincible()
+{
+    PeachPtr->setStarLength();
+}
 int StudentWorld::init()
 {
     Level lev(assetPath());
@@ -352,25 +402,27 @@ int StudentWorld::move()
         if(!PeachPtr->isAlive())
         {
             playSound(SOUND_PLAYER_DIE);
+            decLives();
             return GWSTATUS_PLAYER_DIED;
         }
     }
+    
     for(int i = 0;i<actors.size();i++)
     {
-        if(actors[i]->isAlive())
-        {
             actors[i]->doSomething();//if actors are alive, do something
             if(!PeachPtr->isAlive())
             {
                 playSound(SOUND_PLAYER_DIE);
+                decLives();
                 return GWSTATUS_PLAYER_DIED;
             }
-        }
     }
+
     
     if(levelComplete)
     {
         playSound(SOUND_FINISHED_LEVEL);
+        levelComplete = false;
         return GWSTATUS_FINISHED_LEVEL;
     }
     
@@ -394,7 +446,7 @@ int StudentWorld::move()
         }
     }
     
-    //setGameStatText(determineText(PeachPtr->hasStar(), PeachPtr->hasFlower(), PeachPtr->hasMushroom());
+    setGameStatText(determineText(PeachPtr->hasStar(), PeachPtr->hasFlower(), PeachPtr->hasMushroom()));
     
     return GWSTATUS_CONTINUE_GAME;
 }

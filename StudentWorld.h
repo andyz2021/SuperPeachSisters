@@ -24,6 +24,10 @@ public:
   bool extendOverSpace(int x, int y);
   int randomDir();
   bool overlapPeach(int x, int y, bool bonk);
+  bool PeachHasStar();
+  void setPeachInvincible();
+  void givePeachPower(int type);
+  void damageEnemy(Actor* enemy);
   std::string determineText(bool star, bool flower, bool mushroom);
   int getPeachX();
   int getPeachY();
@@ -36,7 +40,7 @@ public:
 
 private:
     std::vector<Actor*> actors;
-    Actor* PeachPtr;
+    Peach* PeachPtr;
     bool levelComplete;
     bool gameComplete;
     

@@ -10,15 +10,17 @@ class Actor : public GraphObject
   public:
     Actor(StudentWorld* ptr, int imageID, int startX, int startY, int dir, int depth, double size);//Constructor
     virtual void doSomething() = 0;//doSomething function
-    virtual bool blockMovement();//Can actors block movement
-    virtual bool canBeDamaged();//Can actors be damaged
+    virtual bool blockMovement() = 0;//Can actors block movement
+    virtual bool canBeDamaged() = 0;//Can actors be damaged
     void die();//Set alive status to false
     bool isAlive();//check alive status
-    virtual void bonk();//when an actor gets hit
+    virtual void bonk() = 0;//when an actor gets hit
+    virtual void getDamaged();//for when a enemy gets hit with a fireball 
     StudentWorld* getWorld();//get the pointer to the StudentWorld
   private:
     StudentWorld* StudentWorldPtr;
     bool alive;
+
 };
 
 class Peach : public Actor
@@ -27,23 +29,26 @@ class Peach : public Actor
     Peach(StudentWorld* ptr, int startX, int startY);
     virtual void doSomething();
     virtual bool blockMovement();
+    virtual bool canBeDamaged();
     virtual void bonk();
-    void addHp(int health);//add Hp to Peach
-    void setPower(int power);//Give hp power
+    void setStarLength();
+    void setPower(int power);//Give Peach power
     virtual bool hasFlower();
     virtual bool hasStar();
     virtual bool hasMushroom();
+
     
     
   private:
-    bool flower;//all powers
-    bool star;
-    bool mushroom;
+    void setHp(int health);//set Peach's hp
     int starLength;//length of invincibility from star
     int tempImmune;//length of invincibility after getting hit
     int time_to_recharge_before_next_fire;//length between shooting fireballs
     int remaining_jump_distance;//ticks left of jumping
     int hp;
+    bool flower;//all powers
+    bool star;
+    bool mushroom;
     
 };
 
@@ -56,15 +61,16 @@ public:
     virtual void doSomething();
     virtual void bonk();
     virtual bool canBeDamaged();
+    virtual bool blockMovement();
 };
 
 class Block : public Environment
 {
   public:
     Block(StudentWorld* ptr, int startX, int startY, int goodie);
-    bool wasBonked();//check if block was bonked
     virtual void bonk();
   private:
+    bool wasBonked();//check if block was bonked
     int n_goodie;//stores what type of goodie is in the block 
     bool bonked;
 };
@@ -86,6 +92,7 @@ public:
     virtual void doSomething();
     virtual bool blockMovement();
     virtual bool canBeDamaged();
+    virtual void bonk();
     virtual void change() = 0;//Whether the flag or mario changes level or wins the game
 };
 
@@ -110,6 +117,7 @@ public:
     virtual void doSomething();
     virtual bool blockMovement();
     virtual bool canBeDamaged();
+    virtual void bonk();
     virtual void addScore() = 0;//how much each goodie is worth
     virtual void givePower() = 0;//give the power to peach
 };
@@ -145,7 +153,8 @@ public:
     virtual void doSomething();
     virtual bool blockMovement();
     virtual bool canBeDamaged();
-    virtual bool overlap() = 0;//What the fireball overlaps with
+    virtual void bonk();
+    virtual bool overlap();//What the fireball overlaps with
 };
 
 class PiranhaFireball : public Fireball
@@ -158,47 +167,48 @@ public:
 class PeachFireball : public Fireball
 {
 public:
-    PeachFireball(StudentWorld* ptr, int imageID, int startX, int startY, int dir);
-    virtual bool overlap();//Overlaps with Enemies 
+    PeachFireball(StudentWorld* ptr, int startX, int startY, int dir);
 };
 
-class Shell : public PeachFireball
+class Shell : public Fireball
 {
 public:
-    Shell(StudentWorld* ptr, int imageID, int startX, int startY, int dir);
+    Shell(StudentWorld* ptr, int startX, int startY, int dir);
 };
 
-class MovingEnemies : public Actor
+class Enemies : public Actor
 {
 public:
-    MovingEnemies(StudentWorld* ptr, int imageID, int startX, int startY, int dir, int depth, double size);
+    Enemies(StudentWorld* ptr, int imageID, int startX, int startY, int dir, int depth, double size);
     virtual void doSomething();
     virtual bool canBeDamaged();
     virtual bool blockMovement();
+    virtual void bonk();
+    virtual void getDamaged();
+    virtual void afterDeath();
     
 };
 
-class Goomba : public MovingEnemies
+class Goomba : public Enemies
 {
 public:
     Goomba(StudentWorld* ptr, int startX, int startY, int dir);
     
 };
 
-class Koopa : public MovingEnemies
+class Koopa : public Enemies
 {
 public:
     Koopa(StudentWorld* ptr, int startX, int startY, int dir);
+    virtual void afterDeath();
     
 };
 
-class Piranha : public Actor
+class Piranha : public Enemies
 {
 public:
     Piranha(StudentWorld* ptr, int startX, int startY, int dir);
     virtual void doSomething();
-    virtual bool canBeDamaged();
-    virtual bool blockMovement();
 private:
     int firing_delay;
 };
